@@ -123,19 +123,19 @@ button:focus-visible {
 
 @media (max-width: 1180px) {
   .activities-header h1 {
-    font-size: 20px; /* Further adjusted font size for small screens */
+    font-size: 25px; /* Further adjusted font size for small screens */
   }
 
   .activities-nav a {
-    font-size: 12px; /* Further adjusted font size for small screens */
+    font-size: 14px; /* Further adjusted font size for small screens */
   }
 
   .activity-card {
-    max-width: 90%;
-    padding: 8px; /* Reduced padding */
+    max-width: 70%;
+    padding: 2px; /* Reduced padding */
   }
 
   .activity-image {
-    max-height: 150px; /* Smaller max height for mobile */
+    max-height: 200px; /* Smaller max height for mobile */
   }
 }

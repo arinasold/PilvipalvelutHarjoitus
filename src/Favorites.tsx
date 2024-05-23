@@ -74,7 +74,9 @@ export default function Favorites() {
     <div className="activities-container">
       <header className="activities-header">
         <h1>Favorite Activities <FavoriteIcon/></h1>
-        <Button component={Link} to="/" variant="contained" color='primary' endIcon={<SearchIcon/>}>Find more activities</Button> 
+        <div className="button-container">
+        <Button component={Link} to="/" variant="contained" color='primary' endIcon={<SearchIcon/>}>Find more</Button> 
+        </div>
       </header>
       <div className="activities-list">
         {favoriteActivities.map((activity) => (

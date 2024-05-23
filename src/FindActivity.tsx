@@ -8,6 +8,9 @@ import SearchIcon from '@mui/icons-material/Search';
 import { firestore } from '../firebaseConfig';
 import { collection, getDocs, query, where, addDoc} from 'firebase/firestore';
 import { Link } from 'react-router-dom';
+import CircularProgress from '@mui/material/CircularProgress';
+import Snackbar from '@mui/material/Snackbar';
+import Alert from '@mui/material/Alert';
 
 interface Activity {
   id: number;
@@ -30,12 +33,15 @@ const theme = createTheme({
 function Activities() {
   
   const [randomActivity, setRandomActivity] = useState<Activity | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [message, setMessage] = useState<string | null>(null);
 
   useEffect(() => {
     fetchActivities();
   }, []);
 
   const fetchActivities = async () => {
+    setLoading(true);
     try {
       // Fetch the access token
       const tokenResponse = await fetch('https://test.api.amadeus.com/v1/security/oauth2/token', {
@@ -62,72 +68,85 @@ function Activities() {
       }
     } catch (error) {
       console.error('Error fetching activities:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleAddData = async () => {
+    const handleAddData = async () => {
     try {
-      console.log("Adding data...");
       if (randomActivity) {
-        // Check if the activity ID already exists
         const activityRef = collection(firestore, 'Activities');
         const querySnapshot = await getDocs(query(activityRef, where('id', '==', randomActivity.id)));
         if (querySnapshot.empty) {
-          // If no document with the same ID exists, add the activity
           const docRef = await addDoc(activityRef, randomActivity);
           console.log("Document added with ID: ", docRef.id);
-          console.log("Data added successfully!");
           setRandomActivity({ ...randomActivity, addedToFavorite: true });
         } else {
-          console.log("Activity with ID already exists. Not adding.");
+          setMessage("Activity already added to favorites.");
         }
-      } else {
-        console.log("No random activity available to add.");
       }
     } catch (error) {
       console.error("Error adding data:", error);
     }
   };
 
+  const handleCloseMessage = () => {
+    setMessage(null);
+  };
+
   return (
     <ThemeProvider theme={theme}>
-    <div className="activities-container">
-      <header className="activities-header">
-        <h1>Activities in Helsinki</h1>
-        <div className="button-container">
-        <Stack spacing={2} direction="row">
-
-          <Button variant="contained" color='primary' endIcon={<SearchIcon/>} onClick={fetchActivities} >Find Activity</Button>
-          <Button component={Link} to="/favorites" variant="contained" color='primary' endIcon={<FavoriteIcon/>}>Favorites</Button>
-        </Stack>
-        </div>
-      </header>
-      {randomActivity && (
-        <div className="activity-card">
-          <h3>{randomActivity.name}</h3>
-          {randomActivity.pictures.length > 0 && (
-            <img
-              src={randomActivity.pictures[0]}
-              alt={randomActivity.name}
-              className="activity-image"
-            />
-          )}
+      <div className="activities-container">
+        <header className="activities-header">
+          <h1>Activities in Helsinki</h1>
           <div className="button-container">
-          <Button
-                variant="contained"
-                color={randomActivity.addedToFavorite ? 'success' : 'primary'}
-                endIcon={<AddIcon />}
-                onClick={handleAddData}
-              >
-                {randomActivity.addedToFavorite ? 'Added' : 'Add to Favorites'}
+            <Stack spacing={2} direction="row">
+              <Button variant="contained" color='primary' endIcon={<SearchIcon />} onClick={fetchActivities}>
+                Find Activity
               </Button>
+              <Button component={Link} to="/favorites" variant="contained" color='primary' endIcon={<FavoriteIcon />}>
+                Favorites
+              </Button>
+            </Stack>
+          </div>
+        </header>
+        {loading ? (
+          <CircularProgress />
+        ) : (
+          randomActivity && (
+            <div className="activity-card">
+              <h3>{randomActivity.name}</h3>
+              {randomActivity.pictures.length > 0 && (
+                <img
+                  src={randomActivity.pictures[0]}
+                  alt={randomActivity.name}
+                  className="activity-image"
+                />
+              )}
+              <div className="button-container">
+                <Button
+                  variant="contained"
+                  color={randomActivity.addedToFavorite ? 'success' : 'primary'}
+                  endIcon={<AddIcon />}
+                  onClick={handleAddData}
+                >
+                  {randomActivity.addedToFavorite ? 'Added' : 'Add to Favorites'}
+                </Button>
+              </div>
+            </div>
+          )
+        )}
+        <Snackbar open={Boolean(message)} autoHideDuration={6000} onClose={handleCloseMessage}>
+          <Alert onClose={handleCloseMessage} severity="info">
+            {message}
+          </Alert>
+        </Snackbar>
       </div>
-        </div>
-      )}
-    </div>
     </ThemeProvider>
   );
 }
+
 
 
 export default Activities;

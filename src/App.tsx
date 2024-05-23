@@ -13,7 +13,7 @@ function App() {
   };
   
   return isLoggedIn ? (
-    <Router>
+    <Router basename="/PilvipalvelutHarjoitus">
       <Routes>
         <Route path="" element={<Activities />} />
         <Route path="/favorites" element={<Favorites />} />
